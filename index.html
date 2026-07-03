@@ -353,9 +353,13 @@
   <div class="setup" id="aiSetup">
     ローカルAI（Ollama / Gemma・無料）が未接続です。AIなしでも下の入力でデータ検索は使えます。上のボタンでモデルを切替できます。<br>
     有効化（Mac・無料）：①<code>ollama pull gemma3:4b</code>（または <code>gemma4:e4b</code>）　②<code>launchctl setenv OLLAMA_ORIGINS "*"</code>　③Ollama（メニューバー）を再起動
-    <div class="cfg">
-      <input id="ollamaUrl" value="http://localhost:11434" title="エンドポイント" onchange="onModelInput()">
-    </div>
+    <details style="margin-top:8px">
+      <summary style="cursor:pointer;font-weight:700">詳細設定（接続先アドレス・通常は変更不要）</summary>
+      <div class="cfg">
+        <input id="ollamaUrl" value="http://localhost:11434" title="接続先アドレス（通常は http://localhost:11434 のまま）" onchange="onModelInput()">
+        <button class="btn ghost" style="padding:5px 10px;font-size:11.5px;white-space:nowrap" onclick="resetOllamaUrl()">既定に戻す</button>
+      </div>
+    </details>
     <div style="display:flex;gap:6px;margin-top:8px">
       <button class="btn ghost" style="padding:6px 12px;font-size:12px" onclick="checkOllama()">再接続</button>
     </div>
@@ -1062,8 +1066,22 @@ function openChat(){document.getElementById("drawer").classList.add("open");docu
 function closeChat(){document.getElementById("drawer").classList.remove("open");document.getElementById("scrim").classList.remove("open");}
 function clearChat(){const log=document.getElementById("chatLog");if(!log||!log.children.length){toast("チャットは空です");return;}if(confirm("AIチャットの履歴を消去します。よろしいですか？")){log.innerHTML="";toast("チャットをクリアしました");}}
 function autoGrow(el){el.style.height="auto";el.style.height=Math.min(el.scrollHeight,120)+"px";}
-function chatKey(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendChat();}}
-function ollamaCfg(){return{url:document.getElementById("ollamaUrl").value.trim(),model:document.getElementById("ollamaModel").value.trim()};}
+let imeEndAt=0; // 日本語変換が終わった瞬間の時刻
+function chatKey(e){
+  if(e.key!=="Enter"||e.shiftKey)return;
+  if(e.isComposing||e.keyCode===229)return;        // 変換中のEnter＝確定のみ（送信しない）
+  if(Date.now()-imeEndAt<250)return;                // 確定直後のEnterも無視（ブラウザ差対策）
+  e.preventDefault();sendChat();
+}
+const OLLAMA_DEFAULT_URL="http://localhost:11434";
+function ollamaCfg(){
+  const inp=document.getElementById("ollamaUrl");
+  let url=inp.value.trim().replace(/\/+$/,"");
+  // アドレスとして不正な値（モデル名の誤入力等）は自動で既定に戻す
+  if(!/^https?:\/\//.test(url)){url=OLLAMA_DEFAULT_URL;inp.value=url;saveOllamaCfg();}
+  return{url,model:document.getElementById("ollamaModel").value.trim()};
+}
+function resetOllamaUrl(){document.getElementById("ollamaUrl").value=OLLAMA_DEFAULT_URL;saveOllamaCfg();checkOllama();toast("接続先を既定（localhost:11434）に戻しました");}
 async function checkOllama(){
   const {url,model}=ollamaCfg(); const st=document.getElementById("aiStatus"); const setup=document.getElementById("aiSetup");
   st.textContent="接続確認中…"; st.className="st off";
@@ -1278,6 +1296,7 @@ let toastT;function toast(m){const t=document.getElementById("toast");t.textCont
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 window.addEventListener("resize",()=>{if(state.view.v==="proj")render();});
 
+document.getElementById("chatInput").addEventListener("compositionend",()=>{imeEndAt=Date.now();});
 loadOllamaCfg();
 refreshRolePill();
 render();
