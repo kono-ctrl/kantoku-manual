@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>監督マニュアルシステム</title>
+<style>
+  :root{
+    --bg:#EDEFF2; --surface:#FFFFFF; --surface-2:#F4F5F7; --surface-3:#EAECF0;
+    --ink:#1A1D21; --ink-2:#5B6470; --ink-3:#8A929E; --line:#E3E6EB;
+    --primary:#6D5BD0; --primary-2:#4F86F0; --primary-soft:#ECE9FB;
+    --grad:linear-gradient(90deg,#7C5CE0,#4F86F0);
+    --accent:#1EBF97; --accent-soft:#D8F4EC;
+    --warn:#E8973A; --warn-soft:#FBEBD8; --danger:#E15B52; --danger-soft:#FBE3E1;
+    --r-lg:18px; --r-md:12px; --r-sm:9px; --pill:999px;
+    --sh-1:0 1px 2px rgba(20,28,44,.05); --sh-2:0 6px 22px rgba(20,28,44,.08);
+    --fz:14px;
+    --font:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Yu Gothic",YuGothic,"Noto Sans JP",Meiryo,"MS PGothic",sans-serif,"Segoe UI Emoji","Segoe UI Symbol","Apple Color Emoji","Noto Color Emoji";
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{overflow-x:hidden}
+  .grid>*{min-width:0}
+  body{font-family:var(--font);background:var(--bg);color:var(--ink);font-size:var(--fz);line-height:1.6;-webkit-font-smoothing:antialiased}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  input,select{font-family:inherit;font-size:inherit}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:#cdd2da;border-radius:99px;border:2px solid var(--bg)}
+
+  /* ===== Header ===== */
+  .topbar{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.86);backdrop-filter:saturate(1.2) blur(8px);
+    border-bottom:1px solid var(--line);padding:10px 18px;display:flex;align-items:center;gap:14px}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:.01em;white-space:nowrap;cursor:pointer}
+  .brand .logo{width:26px;height:26px;border-radius:8px;background:var(--grad);display:grid;place-items:center;color:#fff;font-size:14px}
+  .search-wrap{position:relative;flex:1;max-width:540px;margin:0 auto}
+  .search-box{width:100%;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--pill);padding:9px 16px;box-shadow:var(--sh-1)}
+  .search-box:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+  .search-box input{flex:1;min-width:0;border:none;outline:none;background:none;font-size:15px}
+  .search-box svg{color:var(--ink-3);flex:none}
+  .search-results{position:absolute;top:48px;left:0;right:0;background:var(--surface);border:1px solid var(--line);
+    border-radius:14px;box-shadow:var(--sh-2);overflow:hidden;display:none;max-height:60vh;overflow-y:auto;z-index:50}
+  .search-results.open{display:block}
+  .sr-head{padding:8px 14px;font-size:12px;color:var(--ink-3);background:var(--surface-2);border-bottom:1px solid var(--line)}
+  .sr-item{display:flex;align-items:center;gap:12px;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--line)}
+  .sr-item:last-child{border-bottom:none}
+  .sr-item:hover{background:var(--primary-soft)}
+  .sr-thumb{width:54px;height:38px;border-radius:7px;background:var(--surface-3);border:1px solid var(--line);
+    display:grid;place-items:center;color:var(--ink-3);flex:none;font-size:10px;font-weight:700;text-align:center;line-height:1.1}
+  .sr-item .t{font-weight:700}
+  .sr-item .s{font-size:12px;color:var(--ink-2)}
+  .sr-item .pg{margin-left:auto;font-size:12px;color:var(--primary);font-weight:700;white-space:nowrap}
+  .sr-empty{padding:18px 14px;color:var(--ink-3);font-size:13px}
+  .topbar-actions{display:flex;align-items:center;gap:6px}
+  .icon-btn{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;color:var(--ink-2);position:relative}
+  .icon-btn:hover{background:var(--surface-2);color:var(--ink)}
+  .icon-btn .dot{position:absolute;top:7px;right:8px;min-width:15px;height:15px;border-radius:99px;background:var(--danger);
+    color:#fff;font-size:9px;font-weight:800;display:grid;place-items:center;padding:0 3px}
+
+  /* ===== Layout ===== */
+  .layer-strip{padding:9px 18px;display:flex;align-items:center;gap:14px;font-size:13px;color:#dfe3ea;
+    background:linear-gradient(90deg,#2A2E37,#363B45)}
+  .layer-strip .lv{background:rgba(255,255,255,.16);color:#fff;font-weight:800;padding:3px 11px;border-radius:7px;font-size:12px}
+  .layer-strip .meta{display:flex;gap:18px;flex-wrap:wrap}
+  .layer-strip .meta b{color:#fff}
+  .crumbs{padding:12px 18px 0;display:flex;gap:7px;align-items:center;font-size:12px;color:var(--ink-3)}
+  .crumbs a{color:var(--primary);font-weight:700;cursor:pointer}
+  .crumbs .sep{color:var(--ink-3)}
+  main{max-width:1180px;margin:0 auto;padding:16px 18px 90px}
+  .grid{display:grid;gap:16px}
+  @media(min-width:860px){.cols-2{grid-template-columns:1fr 1fr}.cols-32{grid-template-columns:1.1fr 1.4fr}.cols-21{grid-template-columns:1.6fr 1fr}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-1);padding:18px 20px}
+  .card h2{margin:0 0 14px;font-size:17px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .card h2 .ic{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;flex:none}
+  .muted{color:var(--ink-2)}
+  .row-item{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-md);padding:12px 14px;margin-bottom:10px;cursor:pointer;transition:.12s}
+  .row-item:hover{border-color:var(--primary);box-shadow:var(--sh-1);transform:translateY(-1px)}
+  .row-item:last-child{margin-bottom:0}
+  .row-item .nm{font-weight:800}
+  .row-item .sub{font-size:12.5px;color:var(--ink-2);margin-top:2px}
+  .tag{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;padding:2px 9px;border-radius:var(--pill)}
+  .tag.warn{background:var(--warn-soft);color:#b96a16}
+  .tag.danger{background:var(--danger-soft);color:#bd3d34}
+  .tag.ok{background:var(--accent-soft);color:#0e8a6c}
+  .tag.idle{background:var(--surface-3);color:var(--ink-2)}
+  .alert{display:flex;align-items:center;gap:10px;background:var(--accent-soft);border:1px solid #bfeee0;color:#0c7457;
+    border-radius:var(--r-md);padding:11px 14px;margin-bottom:10px;font-weight:700;cursor:pointer}
+  .alert.warn{background:var(--warn-soft);border-color:#f3d8b3;color:#9a5b12}
+  .alert.danger{background:var(--danger-soft);border-color:#f1c6c2;color:#a73930}
+  .alert .x{margin-left:auto;font-size:12px;font-weight:800;opacity:.7}
+
+  /* chart */
+  .chart .bar-row{display:grid;grid-template-columns:84px 1fr 42px;align-items:center;gap:10px;margin-bottom:11px}
+  .chart .bar-row .lbl{font-size:12.5px;font-weight:700;color:var(--ink-2);text-align:right}
+  .chart .track{height:16px;background:var(--surface-3);border-radius:99px;overflow:hidden}
+  .chart .fill{height:100%;border-radius:99px;background:var(--grad)}
+  .chart .fill.hot{background:linear-gradient(90deg,#E8973A,#E15B52)}
+  .chart .val{font-size:12px;font-weight:800;color:var(--ink-2)}
+  .chart .cap{font-size:12px;color:var(--ink-3);margin-top:6px}
+
+  /* progress (L2) */
+  .flow .pf{display:grid;grid-template-columns:190px 1fr 48px;gap:14px;align-items:center;margin-bottom:13px}
+  .flow .pf .name{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-md);padding:11px 14px;
+    font-weight:800;display:flex;align-items:center;gap:8px;cursor:pointer}
+  .flow .pf.locked .name{opacity:.55;cursor:not-allowed}
+  .flow .pf .name:hover{border-color:var(--primary)}
+  .flow .ptrack{height:18px;background:var(--surface-3);border-radius:99px;overflow:hidden}
+  .flow .pfill{height:100%;border-radius:99px;transition:width .5s}
+  .flow .pfill.done{background:var(--grad)}
+  .flow .pfill.prog{background:linear-gradient(90deg,#15B58E,#2DD4A7)}
+  .flow .pct{font-weight:800;color:var(--ink-2);font-size:13px}
+  .portal-btn{display:block;width:100%;text-align:center;background:var(--primary);color:#fff;font-weight:800;
+    padding:11px;border-radius:var(--r-md);margin-bottom:10px;box-shadow:var(--sh-1)}
+  .portal-btn:hover{filter:brightness(1.05)}
+  .portal-btn.alt{background:var(--surface);color:var(--primary);border:1px solid var(--primary-soft)}
+
+  /* L3 task table */
+  .ttable{width:100%;border-collapse:separate;border-spacing:0;font-size:13px}
+  .ttable th{font-size:10.5px;color:var(--ink-2);font-weight:800;padding:6px 4px;text-align:center;white-space:nowrap;vertical-align:bottom}
+  .ttable td{padding:10px 6px;border-top:1px solid var(--line);vertical-align:middle}
+  .ttable td.tname{font-weight:800;min-width:200px}
+  .ttable td.tname .sub{font-weight:500;color:var(--ink-2);font-size:12px}
+  .cell-check{text-align:center}
+  .chk{width:22px;height:22px;border-radius:6px;border:1.6px solid var(--line);display:inline-grid;place-items:center;cursor:pointer;color:transparent}
+  .chk.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .cell-date input{width:84px;border:1px solid var(--line);border-radius:7px;padding:4px 6px;text-align:center}
+  .mbtn{background:var(--primary-soft);color:var(--primary);font-weight:800;padding:7px 12px;border-radius:var(--pill);font-size:12.5px;white-space:nowrap}
+  .mbtn:hover{background:#e0dafa}
+  .statusbtn{padding:7px 12px;border-radius:var(--pill);font-weight:800;font-size:12.5px;white-space:nowrap}
+  .statusbtn.todo{background:var(--surface-3);color:var(--ink-2)}
+  .statusbtn.reported{background:var(--warn-soft);color:#a5630f}
+  .statusbtn.approved{background:var(--accent-soft);color:#0e8a6c}
+
+  /* approval flow */
+  .approvalflow{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:8px;flex-wrap:wrap}
+  .afn{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;min-width:120px;text-align:center}
+  .afn .circle{width:66px;height:66px;border-radius:50%;display:grid;place-items:center;background:var(--surface);border:2px solid var(--line)}
+  .afn.active .circle{border-color:var(--accent);background:var(--accent-soft);color:#0e8a6c}
+  .afn.fin .circle{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .afn .t{font-size:12.5px;font-weight:800}
+  .af-arrow{color:var(--ink-3);flex:none}
+  @media(max-width:760px){.af-arrow{display:none}.afn{min-width:46%}}
+
+  /* L4 manual */
+  .manualgrid{display:grid;gap:16px}
+  @media(min-width:860px){.manualgrid{grid-template-columns:1.7fr 1fr}}
+  .photo-box{aspect-ratio:4/3;border:2px dashed var(--line);border-radius:var(--r-md);background:var(--surface-2);
+    display:grid;place-items:center;color:var(--ink-3);text-align:center;font-size:12px;padding:10px}
+  .okng{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:6px 0 4px}
+  .okng .b{border-radius:var(--r-md);padding:10px;border:1px solid var(--line)}
+  .okng .b.ok{background:var(--accent-soft);border-color:#bfeee0}
+  .okng .b.ng{background:var(--danger-soft);border-color:#f1c6c2}
+  .okng .b .h{font-weight:800;margin-bottom:5px}
+  .okng .b.ok .h{color:#0e8a6c}.okng .b.ng .h{color:#bd3d34}
+  details.acc{border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:9px;overflow:hidden;background:var(--surface)}
+  details.acc summary{padding:11px 14px;font-weight:800;cursor:pointer;background:var(--surface-2);list-style:none;display:flex;align-items:center;gap:8px}
+  details.acc summary::-webkit-details-marker{display:none}
+  details.acc .body{padding:12px 16px}
+  .term{margin-bottom:9px}.term b{color:var(--primary)}
+  .talk{background:var(--primary-soft);border-left:3px solid var(--primary);padding:8px 12px;border-radius:0 8px 8px 0;margin:6px 0;font-size:13px}
+  .checklist label{display:flex;gap:9px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--line);cursor:pointer}
+  .checklist label:last-child{border:none}
+  .checklist input{margin-top:3px}
+  .backbtn{display:inline-flex;align-items:center;gap:7px;background:var(--accent);color:#fff;font-weight:800;padding:11px 20px;border-radius:var(--pill);box-shadow:var(--sh-1)}
+  .backbtn:hover{filter:brightness(1.05)}
+  .mini-search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1.6px solid var(--accent);border-radius:var(--pill);padding:8px 14px;margin-bottom:12px}
+  .mini-search input{flex:1;border:none;outline:none;background:none}
+  .related .ri{display:flex;gap:10px;align-items:center;padding:9px;border:1px solid var(--line);border-radius:var(--r-md);margin-bottom:9px;cursor:pointer}
+  .related .ri:hover{border-color:var(--accent)}
+
+  /* drawer (chat) */
+  .scrim{position:fixed;inset:0;background:rgba(15,20,30,.32);z-index:60;opacity:0;pointer-events:none;transition:.2s}
+  .scrim.open{opacity:1;pointer-events:auto}
+  .drawer{position:fixed;top:0;right:0;height:100%;width:min(420px,92vw);background:var(--surface);z-index:70;
+    box-shadow:-10px 0 40px rgba(20,28,44,.18);transform:translateX(100%);transition:transform .24s;display:flex;flex-direction:column}
+  .drawer.open{transform:translateX(0)}
+  .drawer-head{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+  .drawer-head .av{width:32px;height:32px;border-radius:9px;background:var(--grad);color:#fff;display:grid;place-items:center}
+  .drawer-head .nm{font-weight:800}
+  .drawer-head .st{font-size:11.5px;font-weight:700}
+  .st.on{color:var(--accent)}.st.off{color:var(--ink-3)}
+  .model-toggle{display:flex;align-items:center;gap:6px;padding:9px 14px;border-bottom:1px solid var(--line);background:var(--surface-2);flex-wrap:wrap}
+  .model-toggle .mt-lab{font-size:11px;font-weight:800;color:var(--ink-3);margin-right:2px}
+  .model-toggle .mt-btn{padding:5px 11px;border-radius:var(--pill);font-size:12px;font-weight:800;background:var(--surface);border:1px solid var(--line);color:var(--ink-2)}
+  .model-toggle .mt-btn.on{background:var(--primary);border-color:var(--primary);color:#fff}
+  .model-toggle .mt-btn:hover{border-color:var(--primary)}
+  .model-toggle input{flex:1;min-width:88px;border:1px solid var(--line);border-radius:8px;padding:5px 9px;font-size:12px;background:#fff}
+  .model-toggle input:focus{border-color:var(--primary);outline:none}
+  .chat-log{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+  .msg{max-width:88%;padding:10px 13px;border-radius:14px;font-size:13.5px;white-space:pre-wrap;word-break:break-word}
+  .msg.u{align-self:flex-end;background:var(--primary);color:#fff;border-bottom-right-radius:4px}
+  .msg.a{align-self:flex-start;background:var(--surface-2);border:1px solid var(--line);border-bottom-left-radius:4px}
+  .msg.a .hits{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+  .msg.a .hit{background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:7px 10px;font-size:12.5px;cursor:pointer}
+  .msg.a .hit:hover{border-color:var(--primary)}
+  .chat-input{border-top:1px solid var(--line);padding:11px;display:flex;gap:8px;align-items:flex-end}
+  .chat-input textarea{flex:1;border:1px solid var(--line);border-radius:12px;padding:9px 12px;resize:none;max-height:120px;outline:none}
+  .chat-input textarea:focus{border-color:var(--primary)}
+  .send{width:40px;height:40px;border-radius:11px;background:var(--primary);color:#fff;display:grid;place-items:center;flex:none}
+  .send:disabled{opacity:.4}
+  .setup{font-size:12px;color:var(--ink-2);background:var(--warn-soft);border:1px solid #f3d8b3;border-radius:10px;padding:10px 12px;margin:0 11px 11px}
+  .setup code{background:#fff;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:11.5px}
+  .setup .cfg{display:flex;gap:6px;margin-top:8px}
+  .setup .cfg input{flex:1;border:1px solid var(--line);border-radius:7px;padding:5px 8px;font-size:12px}
+
+  /* modal */
+  .modal{position:fixed;inset:0;z-index:80;display:none;place-items:center;background:rgba(15,20,30,.4);padding:18px}
+  .modal.open{display:grid}
+  .modal .box{background:var(--surface);border-radius:var(--r-lg);max-width:640px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:var(--sh-2)}
+  .modal .mh{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;font-weight:800;font-size:16px;position:sticky;top:0;background:var(--surface)}
+  .modal .mh .x{margin-left:auto}
+  .modal .mb{padding:18px 20px}
+  .drop{border:2px dashed var(--line);border-radius:var(--r-md);padding:26px;text-align:center;color:var(--ink-2);background:var(--surface-2);cursor:pointer}
+  .drop.drag{border-color:var(--primary);background:var(--primary-soft)}
+  .map-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px 14px;margin-top:6px}
+  .map-grid label{font-size:12.5px;font-weight:700;color:var(--ink-2)}
+  .map-grid select{width:100%;border:1px solid var(--line);border-radius:8px;padding:7px 9px;background:#fff}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-weight:800;padding:10px 18px;border-radius:var(--pill)}
+  .btn.primary{background:var(--primary);color:#fff}
+  .btn.ghost{background:var(--surface-2);color:var(--ink);border:1px solid var(--line)}
+  .btn.primary:disabled{opacity:.4}
+  .menu{position:absolute;top:46px;right:14px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh-2);overflow:hidden;display:none;z-index:55;min-width:200px}
+  .menu.open{display:block}
+  .menu button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:11px 15px;font-size:13.5px;font-weight:600}
+  .menu button:hover{background:var(--surface-2)}
+  .preview-tbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;display:block;overflow-x:auto;white-space:nowrap}
+  .preview-tbl th,.preview-tbl td{border:1px solid var(--line);padding:5px 8px;text-align:left}
+  .preview-tbl th{background:var(--surface-2);font-weight:800}
+  .seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--pill);padding:3px;gap:3px;margin-bottom:12px}
+  .seg button{padding:6px 14px;border-radius:var(--pill);font-weight:800;font-size:12.5px;color:var(--ink-2)}
+  .seg button.on{background:var(--surface);color:var(--primary);box-shadow:var(--sh-1)}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:#23272F;color:#fff;
+    padding:11px 18px;border-radius:var(--pill);font-weight:700;font-size:13px;z-index:99;opacity:0;transition:.25s;box-shadow:var(--sh-2)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .empty{text-align:center;color:var(--ink-3);padding:30px 10px;font-size:13px}
+
+  /* ===== v3 additions ===== */
+  .ver{font-size:10px;font-weight:800;background:var(--primary-soft);color:var(--primary);padding:2px 7px;border-radius:99px;margin-left:2px}
+  .rolepill{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--pill);padding:6px 13px;font-weight:800;font-size:12px;color:var(--ink-2);white-space:nowrap}
+  .rolepill:hover{border-color:var(--primary);color:var(--primary)}
+  .rolepill .rdot{width:8px;height:8px;border-radius:50%;background:var(--accent)}
+  .rolepill.staff .rdot{background:var(--primary-2)}
+  .duecell input{width:112px;border:1px solid var(--line);border-radius:7px;padding:4px 6px;font-size:12px;background:#fff;color:var(--ink)}
+  .duecell input.od{border-color:var(--danger);background:var(--danger-soft);color:#a73930;font-weight:700}
+  .odchip{display:inline-flex;align-items:center;font-size:10.5px;font-weight:800;background:var(--danger-soft);color:#bd3d34;
+    padding:1px 8px;border-radius:99px;margin-left:6px;white-space:nowrap}
+  .linkbtn{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);
+    color:var(--ink-2);font-weight:800;font-size:12px;padding:6px 13px;border-radius:var(--pill);white-space:nowrap}
+  .linkbtn:hover{border-color:var(--primary);color:var(--primary)}
+  .linkbtn.andpad{border-color:#f0b8ac;color:#d9542f;background:#fdf1ec}
+  .linkbtn.andpad:hover{filter:brightness(.97)}
+  .logbtn{width:28px;height:28px;border-radius:8px;display:inline-grid;place-items:center;color:var(--ink-3)}
+  .logbtn:hover{background:var(--surface-2);color:var(--ink)}
+  .loglist{list-style:none;margin:0;padding:0}
+  .loglist li{display:flex;gap:10px;padding:9px 2px;border-bottom:1px solid var(--line);font-size:13px;align-items:baseline}
+  .loglist li:last-child{border:none}
+  .loglist .ts{color:var(--ink-3);font-size:11.5px;white-space:nowrap}
+  .loglist .who{font-weight:800;white-space:nowrap}
+  .loglist .act{font-weight:800}
+  .act.report{color:#a5630f}.act.approve{color:#0e8a6c}.act.reject{color:#bd3d34}
+  .loglist .note{color:var(--ink-2)}
+  .feed .fi{display:flex;gap:9px;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--line);font-size:12.5px;cursor:pointer}
+  .feed .fi:hover{background:var(--surface-2)}
+  .feed .fi:last-child{border:none}
+  .feed .ts{color:var(--ink-3);font-size:11px;white-space:nowrap}
+  .mytask .mt-due{font-size:11.5px;font-weight:800;color:var(--ink-2);white-space:nowrap}
+  .mytask .mt-due.od{color:#bd3d34}
+  .photo-box{position:relative;cursor:pointer;overflow:hidden}
+  .photo-box:hover{border-color:var(--primary);color:var(--primary)}
+  .photo-box img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit}
+  .photo-box .rmv{position:absolute;top:6px;right:6px;z-index:2;width:24px;height:24px;border-radius:7px;
+    background:rgba(20,25,35,.62);color:#fff;font-size:12px;font-weight:800;display:grid;place-items:center}
+  .set-grid{display:grid;gap:12px}
+  .set-grid label{font-size:12.5px;font-weight:800;color:var(--ink-2)}
+  .set-grid input,.set-grid select{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 11px;background:#fff;margin-top:4px}
+  .set-grid input:focus,.set-grid select:focus{border-color:var(--primary);outline:none}
+  .row-item>div:first-child{flex-wrap:wrap}
+  @media(max-width:720px){
+    .brand span:nth-child(2),.brand .ver{display:none}
+    .topbar{gap:8px;padding:10px 12px}
+    .topbar-actions{gap:2px}
+    .rolepill{padding:6px 9px;font-size:11px}
+    .search-wrap{min-width:0}
+    .search-box{padding:8px 12px}
+    .icon-btn{width:34px;height:34px}
+    #andpadBtn{display:none}
+    main{padding:14px 12px 90px}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand" onclick="go({v:'dash'})">
+    <span class="logo">監</span><span>監督マニュアルシステム</span><span class="ver">v3</span>
+  </div>
+  <div class="search-wrap">
+    <div class="search-box">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+      <input id="globalSearch" placeholder="マニュアル横断検索（例：ジャンカ／スリーブ勾配／気密パッキン）" autocomplete="off">
+    </div>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+  <div class="topbar-actions">
+    <button class="rolepill" id="rolePill" title="クリックで役割を切替（担当者⇄上司）" onclick="toggleRole()"><span class="rdot"></span><span id="roleLabel">上司</span></button>
+    <button class="icon-btn" id="andpadBtn" title="ANDPADを開く" onclick="openAndpadHome()">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4h6v6"/><path d="M20 4 10 14"/><path d="M20 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5"/></svg>
+    </button>
+    <button class="icon-btn" id="chatBtn" title="AIアシスタント" onclick="openChat()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-8.5 8.5 8.5 8.5 0 0 1-3.8-.9L3 20l1.4-4.2A8.5 8.5 0 1 1 21 11.5z"/></svg>
+    </button>
+    <button class="icon-btn" id="bellBtn" title="承認待ち" onclick="go({v:'dash'})">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+      <span class="dot" id="bellDot" style="display:none">0</span>
+    </button>
+    <button class="icon-btn" id="menuBtn" title="データ" onclick="toggleMenu(event)">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <div class="menu" id="dataMenu">
+      <button onclick="openSettings()">⚙️&nbsp; 設定（名前・役割・ANDPAD）</button>
+      <button onclick="openImport()">⬆️&nbsp; データを取り込む（CSV/TSV/JSON）</button>
+      <button onclick="exportJSON()">⬇️&nbsp; JSONで書き出す（バックアップ）</button>
+      <button onclick="exportCSV()">📄&nbsp; 物件一覧をCSVで書き出す</button>
+      <button onclick="resetData()">♻️&nbsp; サンプルデータに戻す</button>
+    </div>
+  </div>
+</header>
+
+<div id="layerStrip"></div>
+<div id="crumbs" class="crumbs"></div>
+<main id="view"></main>
+
+<!-- Chat drawer -->
+<div class="scrim" id="scrim" onclick="closeChat()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-head">
+    <div class="av">AI</div>
+    <div style="flex:1">
+      <div class="nm">現場アシスタント</div>
+      <div class="st off" id="aiStatus">接続確認中…</div>
+    </div>
+    <button class="icon-btn" title="チャットをクリア" onclick="clearChat()"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg></button>
+    <button class="icon-btn" onclick="closeChat()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  </div>
+  <div class="model-toggle">
+    <span class="mt-lab">モデル</span>
+    <button class="mt-btn" data-model="gemma3:4b" onclick="setModel('gemma3:4b')">gemma3:4b</button>
+    <button class="mt-btn" data-model="gemma4:e4b" onclick="setModel('gemma4:e4b')">gemma4:e4b</button>
+    <input id="ollamaModel" value="gemma3:4b" title="モデル名（直接入力も可）" placeholder="モデル名" onchange="onModelInput()">
+  </div>
+  <div class="setup" id="aiSetup">
+    ローカルAI（Ollama / Gemma・無料）が未接続です。AIなしでも下の入力でデータ検索は使えます。上のボタンでモデルを切替できます。<br>
+    有効化（Mac・無料）：①<code>ollama pull gemma3:4b</code>（または <code>gemma4:e4b</code>）　②<code>launchctl setenv OLLAMA_ORIGINS "*"</code>　③Ollama（メニューバー）を再起動
+    <div class="cfg">
+      <input id="ollamaUrl" value="http://localhost:11434" title="エンドポイント" onchange="onModelInput()">
+    </div>
+    <div style="display:flex;gap:6px;margin-top:8px">
+      <button class="btn ghost" style="padding:6px 12px;font-size:12px" onclick="checkOllama()">再接続</button>
+    </div>
+  </div>
+  <div class="chat-log" id="chatLog"></div>
+  <div class="chat-input">
+    <textarea id="chatInput" rows="1" placeholder="例：遅延している物件は？ / 鈴木様の次タスクは？ / ジャンカの補修基準は？" oninput="autoGrow(this)" onkeydown="chatKey(event)"></textarea>
+    <button class="send" id="sendBtn" onclick="sendChat()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg></button>
+  </div>
+</aside>
+
+<!-- Import modal -->
+<div class="modal" id="importModal">
+  <div class="box">
+    <div class="mh">データ取り込み <button class="icon-btn x" onclick="closeImport()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="mb" id="importBody"></div>
+  </div>
+</div>
+
+<!-- Settings modal -->
+<div class="modal" id="settingsModal">
+  <div class="box" style="max-width:460px">
+    <div class="mh">⚙️ 設定 <button class="icon-btn x" onclick="closeSettings()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="mb">
+      <div class="set-grid">
+        <label>あなたの名前（報告・承認の記録に使われます）
+          <input id="setMe" placeholder="例：山田太郎"></label>
+        <label>役割
+          <select id="setRole">
+            <option value="boss">上司（承認・差し戻しができる）</option>
+            <option value="staff">担当者（完了報告のみ）</option>
+          </select></label>
+        <label>ANDPAD トップURL（右上の↗ボタンで開く先）
+          <input id="setAndpad" placeholder="https://work.andpad.jp/"></label>
+        <div class="muted" style="font-size:12px">物件ごとのANDPAD案件URLは、各物件ページ（第2階層）の「ANDPAD URL設定」から登録できます。</div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end">
+        <button class="btn ghost" onclick="closeSettings()">キャンセル</button>
+        <button class="btn primary" onclick="saveSettings()">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Task log modal -->
+<div class="modal" id="logModal">
+  <div class="box" style="max-width:520px">
+    <div class="mh">📜 操作履歴 <button class="icon-btn x" onclick="closeLog()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+    <div class="mb" id="logBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =================== Sample data =================== */
+const PROCS = ["工期確定mtg","引継ぎ","基礎工事","土台敷き","壁貫通検査","造作","竣工検査"];
+
+function sampleManuals(){return [
+ {id:"m04",code:"04",title:"基礎完成検査編",page:12,cat:"基礎工事",
+  keywords:["ジャンカ","クラック","天端レベル","てんば","雑コンレベル","玄関土間","基礎伏図","基礎完成検査","補修"],
+  intro:"型枠が外れた時に行う検査。基礎屋さん最後の検査で、この次は大工さんが立会者になります。",
+  terms:[
+    {t:"天端（てんば）レベル",d:"基礎の上端が平行になっているか確認すること。"},
+    {t:"ジャンカ",d:"側面の表面に砂利が露出して見える状態のこと。"},
+    {t:"クラック",d:"ひび割れのこと。"},
+    {t:"雑コンレベル",d:"玄関となる部分に流すコンクリートの高さのこと。"}],
+  items:[
+    {t:"検査①玄関土間のレベル",talk:"基礎伏図に記載の雑コンレベルを確認します。玄関位置で基礎天端を基準にメジャーを当ててください。",note:"ランダム3箇所撮影／基礎伏図の数値より低いのはOK。"},
+    {t:"検査②ジャンカ・クラック",talk:"100mm以上のジャンカは補修の対象です。発生時はポリマーセメントモルタル等で補修してください。",note:"クラックは巾0.5mm以上・深さ4mm以上が補修対象。"}],
+  okng:{ok:"ジャンカ100mm未満／クラック基準内",ng:"100mm以上のジャンカ・基準超のクラック → 報告書に✖、補修指示"},
+  checklist:["雑コンレベルを基礎伏図と照合した","雑コン幅（仕上り+10mm控え）を確認した","100mm以上のジャンカがないか確認した","基準超のクラックがないか確認した","天端レベルの平行を確認した"]},
+
+ {id:"m05",code:"05",title:"土台敷き検査編",page:15,cat:"土台敷き",
+  keywords:["パッキン","気密パッキン","大引き","埋め木","補強金物","スクリューワッシャー","土台","欠け","割れ","承認図","床断熱","基礎断熱"],
+  intro:"基礎と土台の取り合い・気密施工・欠け割れを確認する検査。第三者検査機関（家守り）の予約は検査1週間前にweb予約。",
+  terms:[
+    {t:"パッキン",d:"基礎と土台の間に挟み、通気を塞ぐ／通す道具。"},
+    {t:"大引き",d:"下に基礎がない部分の土台のこと。"},
+    {t:"埋め木",d:"穴の開け間違い時に同寸の木で穴を埋めること。"},
+    {t:"補強金物",d:"土台にヒビ・割れが出た時に横から補強する金物。"}],
+  items:[
+    {t:"検査①パッキンの確認",talk:"気密パッキンになっている玄関・UB（床下がりならキッチンも）の写真を撮らせてください。",note:"承認図で断熱種類（床断熱／基礎断熱）を事前確認。基礎断熱は指定の気密パッキン使用と外周部施工を東西南北4箇所撮影。"},
+    {t:"検査②欠け・割れ／穴の開け間違い",talk:"土台に欠け・割れはありませんか？穴の開け間違いはありませんか？",note:"②③はぐるっと一周しながら同時確認。"}],
+  okng:{ok:"指定の気密パッキン使用・外周部施工あり／欠け割れなし",ng:"指定外パッキン・施工漏れ／土台の欠け・割れ → 補強金物・埋め木で対応"},
+  checklist:["承認図で断熱種類を確認した","気密パッキン箇所を撮影した","基礎断熱：指定気密パッキンの使用を確認した","外周部の気密パッキン施工を4箇所撮影した","土台の欠け・割れを一周確認した","穴の開け間違いがないか確認した"]},
+
+ {id:"m09",code:"09",title:"壁貫通検査編",page:8,cat:"壁貫通検査",
+  keywords:["スリーブ勾配","壁貫通","外部貫通部","気泡","電気配線図","耐力壁","コンセントボックス","面材","LogWalk","ANDPAD"],
+  intro:"外壁の面材に開ける穴が指示通り施工されるか確認する検査。対象は電気業者さん。ラカーサでは柱・梁の貫通はNG。",
+  terms:[
+    {t:"欠く",d:"配管が干渉し梁や柱の一部が欠損すること。※柱・梁の貫通はNG。"},
+    {t:"スリーブ勾配",d:"室内に雨水が入らないよう外部貫通部に取る勾配（1/100〜1/50）。"}],
+  items:[
+    {t:"検査①スリーブ勾配の確認",talk:"外部貫通部のスリーブ勾配を確認します。1階の○○から時計回りで検査します（2階も同様）。",note:"勾配は1/100〜1/50。気泡の位置で判定する。"}],
+  okng:{ok:"気泡が一番手前（室内側）にきている",ng:"気泡が一番奥（室外側）にきている"},
+  checklist:["外部貫通部の位置を図面で印した","耐力壁の基準を確認した（3連コンセントは補強要）","スリーブ勾配を時計回りで全数確認した","気泡が室内側にあることを確認した","LogWalk撮影を依頼した","ANDPADへ写真転送・検査提出した"]}
+];}
+
+function mkTasks(procName, manualId, base){
+  // base: status seed
+  const map={
+    "基礎工事":[["基礎完成検査依頼（上長・品質管理）","m04"],["自主検査","m04"]],
+    "土台敷き":[["土台敷き検査依頼","m05"],["第三者検査（家守り）web予約","m05"]],
+    "壁貫通検査":[["スリーブ勾配検査","m09"],["ANDPAD写真転送・提出","m09"]],
+    "工期確定mtg":[["工期確定ミーティング",null]],
+    "引継ぎ":[["営業→工務 引継ぎ",null]],
+    "造作":[["造作工事 進捗確認",null]],
+    "竣工検査":[["社内竣工検査",null],["施主立会い検査",null]]
+  };
+  const defs=map[procName]||[["タスク",null]];
+  return defs.map((d,i)=>({
+    id:procName+"-"+i+"-"+Math.random().toString(36).slice(2,6),
+    name:d[0], manualId:d[1], assignee:"", due:"", actual:"",
+    status: base==="approved"?"approved":(base==="reported"&&i===0?"reported":"todo"),
+    checks:[false,false,false,false,false], log:[]
+  }));
+}
+function dstr(offsetDays){const d=new Date();d.setDate(d.getDate()+offsetDays);return d.toISOString().slice(0,10);}
+
+function sampleProperties(){
+  const mk=(name,customer,manager,start,prog)=>{
+    const processes=PROCS.map((p,i)=>{
+      const pr=prog[i]||0;
+      const base = pr===100?"approved":(pr>0&&pr<100?"reported":"todo");
+      return {id:name+"-p"+i, name:p, progress:pr, locked: i>0 && (prog[i-1]||0)<100 && pr===0,
+        delay: 0, rework:0, tasks:mkTasks(p, null, base)};
+    });
+    return {id:name, name, customer, manager, start, andpadUrl:"", processes};
+  };
+  const a=mk("田中邸","鈴木様","山田太郎","2026-04-01",[100,100,80,0,0,0,0]);
+  a.processes[2].delay=6; a.processes[2].rework=2; a.alert="schedule"; // 基礎遅延
+  a.processes[2].tasks.forEach((t,i)=>{t.assignee="山田太郎"; t.due = i===0? dstr(-3): dstr(2);}); // 期日超過デモ
+  const b=mk("佐藤邸","高橋様","佐藤健","2026-04-15",[100,100,100,60,0,0,0]);
+  b.processes[3].delay=2; b.processes[2].rework=1;
+  b.processes[3].tasks.forEach((t,i)=>{t.assignee="佐藤健"; t.due = dstr(4+i*3);});
+  const c=mk("高木邸","五島様","川野誠","2026-05-10",[100,40,0,0,0,0,0]);
+  c.processes[1].rework=1;
+  c.processes[1].tasks.forEach(t=>{t.assignee="川野誠"; t.due = dstr(1);});
+  return [a,b,c];
+}
+
+/* =================== State / persistence =================== */
+const LS_KEY="kantoku_system_v3";
+const LS_KEY_OLD="kantoku_system_v1";
+let state=load();
+function defaultSettings(){return {role:"boss", me:"", andpadHome:"https://work.andpad.jp/"};}
+function load(){
+  try{const j=JSON.parse(localStorage.getItem(LS_KEY)); if(j&&j.properties) return migrate(j);}catch(e){}
+  try{const j=JSON.parse(localStorage.getItem(LS_KEY_OLD)); if(j&&j.properties) return migrate(j);}catch(e){} // v1データを自動引き継ぎ
+  return migrate({properties:sampleProperties(), manuals:sampleManuals(), view:{v:"dash"}});
+}
+function migrate(j){
+  j.settings = Object.assign(defaultSettings(), j.settings||{});
+  j.view = j.view||{v:"dash"};
+  (j.properties||[]).forEach(p=>{
+    if(p.andpadUrl==null)p.andpadUrl="";
+    (p.processes||[]).forEach(pr=>(pr.tasks||[]).forEach(t=>{
+      if(Array.isArray(t.checks)&&t.checks.length===8)t.checks=t.checks.slice(3); // 旧8列→5列（日程系はdue/actualへ）
+      if(!Array.isArray(t.checks))t.checks=[false,false,false,false,false];
+      while(t.checks.length<5)t.checks.push(false);
+      if(!Array.isArray(t.log))t.log=[];
+      if(t.due==null)t.due=""; if(t.actual==null)t.actual="";
+    }));
+  });
+  (j.manuals||[]).forEach(m=>{ if(m.photos==null)m.photos={ok:"",ng:""}; if(m.srcUrl==null)m.srcUrl=""; });
+  return j;
+}
+function save(){try{localStorage.setItem(LS_KEY,JSON.stringify(state));}catch(e){toast("保存に失敗（容量超過の可能性）。写真を減らすかJSONバックアップを推奨");}}
+function resetData(){ if(confirm("サンプルデータに戻します。取り込んだデータは消えます。よろしいですか？")){ const s=state.settings; state=migrate({properties:sampleProperties(),manuals:sampleManuals(),view:{v:"dash"},settings:s}); save(); render(); toast("サンプルに戻しました"); } closeMenu(); }
+
+/* =================== v3 helpers =================== */
+function today(){return new Date().toISOString().slice(0,10);}
+function isOverdue(t){return !!t.due && t.status!=="approved" && t.due < today();}
+function propOverdue(p){let n=0;p.processes.forEach(pr=>pr.tasks.forEach(t=>{if(isOverdue(t))n++;}));return n;}
+function isDelayed(p){return p.alert==="schedule" || propOverdue(p)>0;}
+function nowTs(){const d=new Date();const z=n=>String(n).padStart(2,"0");return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`;}
+function actor(){return (state.settings.me||"").trim()|| (state.settings.role==="boss"?"上司":"担当者");}
+function addLog(t,act,note){t.log.push({ts:nowTs(),who:actor(),act,note:note||""});if(t.log.length>50)t.log=t.log.slice(-50);}
+const ACT_LABEL={report:"完了報告",approve:"承認",reject:"差し戻し"};
+
+/* =================== Router =================== */
+function go(v){ state.view=v; save(); render(); window.scrollTo({top:0,behavior:"instant"}); }
+function curProp(){return state.properties.find(p=>p.id===state.view.pid);}
+function curProc(){const p=curProp();return p&&p.processes.find(x=>x.id===state.view.prid);}
+function curManual(){return state.manuals.find(m=>m.id===state.view.mid);}
+
+function render(){
+  const v=state.view; renderBell();
+  // layer strip
+  const strip=document.getElementById("layerStrip"); const cr=document.getElementById("crumbs");
+  let lv="", meta="", crumbs="";
+  if(v.v==="dash"){strip.innerHTML="";cr.innerHTML="";}
+  else if(v.v==="proj"){const p=curProp();
+    lv='<span class="lv">第2階層</span>'; meta=`<div class="meta"><span>顧客名：<b>${esc(p.customer)}</b></span><span>担当者：<b>${esc(p.manager)}</b></span><span>着工日：<b>${esc(p.start)}</b></span></div>`;
+    crumbs=`<a onclick="go({v:'dash'})">トップ</a><span class="sep">/</span>${esc(p.name)}`;}
+  else if(v.v==="tasks"){const p=curProp(),pr=curProc();
+    lv='<span class="lv">第3階層</span>'; meta=`<div class="meta"><span>${esc(p.name)}</span><span>工程：<b>${esc(pr.name)}</b></span></div>`;
+    crumbs=`<a onclick="go({v:'dash'})">トップ</a><span class="sep">/</span><a onclick="go({v:'proj',pid:'${p.id}'})">${esc(p.name)}</a><span class="sep">/</span>${esc(pr.name)}`;}
+  else if(v.v==="manual"){const m=curManual();
+    lv='<span class="lv">第4階層</span>'; meta=`<div class="meta"><span>マニュアル詳細</span><span><b>${esc(m.title)}</b></span></div>`;
+    crumbs=`<a onclick="go({v:'dash'})">トップ</a><span class="sep">/</span>マニュアル<span class="sep">/</span>${esc(m.title)}`;}
+  strip.innerHTML = lv? `<div class="layer-strip">${lv}${meta}</div>`:"";
+  cr.innerHTML = crumbs? crumbs:"";
+  const view=document.getElementById("view");
+  if(v.v==="dash") view.innerHTML=renderDash();
+  else if(v.v==="proj") view.innerHTML=renderProj();
+  else if(v.v==="tasks") view.innerHTML=renderTasks();
+  else if(v.v==="manual") view.innerHTML=renderManual();
+}
+
+/* =================== L1 Dashboard =================== */
+function pendingApprovals(){
+  let list=[];
+  state.properties.forEach(p=>p.processes.forEach(pr=>pr.tasks.forEach(t=>{
+    if(t.status==="reported") list.push({p,pr,t});
+  })));
+  return list;
+}
+function overdueTasks(){
+  let list=[];
+  state.properties.forEach(p=>p.processes.forEach(pr=>pr.tasks.forEach(t=>{ if(isOverdue(t)) list.push({p,pr,t}); })));
+  return list;
+}
+function myTasks(){
+  const me=(state.settings.me||"").trim();
+  let list=[];
+  state.properties.forEach(p=>p.processes.forEach(pr=>{ if(pr.locked)return;
+    pr.tasks.forEach(t=>{ if(t.status==="approved")return;
+      if(me && t.assignee && t.assignee!==me)return;      // 名前設定済みなら自分の分だけ
+      list.push({p,pr,t,od:isOverdue(t)});
+    });
+  }));
+  list.sort((a,b)=>( (a.t.due||"9999") < (b.t.due||"9999") ? -1:1 ));
+  return list.slice(0,8);
+}
+function recentLogs(){
+  let list=[];
+  state.properties.forEach(p=>p.processes.forEach(pr=>pr.tasks.forEach(t=>t.log.forEach(l=>list.push({p,pr,t,l})))));
+  list.sort((a,b)=> a.l.ts<b.l.ts?1:-1 );
+  return list.slice(0,8);
+}
+function renderBell(){
+  const n=pendingApprovals().length+overdueTasks().length; const d=document.getElementById("bellDot");
+  const bell=document.getElementById("bellBtn");
+  if(bell)bell.title=`承認待ち${pendingApprovals().length}件／期日超過${overdueTasks().length}件`;
+  if(n>0){d.style.display="grid";d.textContent=n;}else d.style.display="none";
+}
+function delayChart(){
+  const agg={}; PROCS.forEach(p=>agg[p]={delay:0,rework:0,od:0});
+  state.properties.forEach(p=>p.processes.forEach(pr=>{ if(!agg[pr.name])return;
+    agg[pr.name].delay+=pr.delay||0;agg[pr.name].rework+=pr.rework||0;
+    pr.tasks.forEach(t=>{if(isOverdue(t))agg[pr.name].od++;});
+  }));
+  const rows=Object.entries(agg).map(([k,v])=>({k,score:v.delay+v.rework*2+v.od*2,delay:v.delay,rework:v.rework,od:v.od})).filter(r=>r.score>0);
+  const max=Math.max(1,...rows.map(r=>r.score));
+  if(!rows.length) return '<div class="empty">遅延・差し戻しはありません 🎉</div>';
+  return '<div class="chart">'+rows.map(r=>`
+    <div class="bar-row">
+      <span class="lbl">${esc(r.k)}</span>
+      <div class="track"><div class="fill ${r.score/max>.6?'hot':''}" style="width:${Math.round(r.score/max*100)}%"></div></div>
+      <span class="val">${r.delay?r.delay+"日":""}${r.od?" ⏰"+r.od:""}</span>
+    </div>`).join("")+
+    '<div class="cap">工程の遅延日数＋差し戻し回数（×2）＋期日超過タスク数（×2）を集計。最も「躓き」が多い工程ほどバーが長くなります。</div></div>';
+}
+function renderDash(){
+  const props=state.properties;
+  const propList = props.length? props.map(p=>{
+    const done=p.processes.filter(x=>x.progress===100).length;
+    const cur=p.processes.find(x=>x.progress>0&&x.progress<100);
+    const od=propOverdue(p);
+    const badge = isDelayed(p)?'<span class="tag danger">遅延'+(od?'・超過'+od:'')+'</span>':(cur?'<span class="tag ok">進行中</span>':'<span class="tag idle">待機</span>');
+    const ap = p.andpadUrl? `<a class="linkbtn andpad" style="margin-left:auto" href="${esc(p.andpadUrl)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">ANDPAD ↗</a>`:"";
+    return `<div class="row-item" onclick="go({v:'proj',pid:'${p.id}'})">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="nm">${esc(p.name)}</span>${badge}${ap}
+      </div>
+      <div class="sub">顧客：${esc(p.customer)}／担当：${esc(p.manager)}／着工：${esc(p.start)}　—　${done}/${p.processes.length}工程完了${cur?'（現在：'+esc(cur.name)+' '+cur.progress+'%）':''}</div>
+    </div>`;}).join(""):'<div class="empty">物件がありません。右上メニューから取り込めます。</div>';
+
+  const pend=pendingApprovals();
+  const ods=overdueTasks();
+  const delayed=props.filter(p=>isDelayed(p));
+  let alerts="";
+  delayed.forEach(p=>{const od=propOverdue(p);alerts+=`<div class="alert danger" onclick="go({v:'proj',pid:'${p.id}'})">⚠️ 遅延物件：${esc(p.name)}${od?'（期日超過 '+od+'件）':''}<span class="x">確認 ›</span></div>`;});
+  if(state.settings.role==="boss"&&pend.length) alerts+=`<div class="alert" onclick="document.getElementById('pendBox').scrollIntoView({behavior:'smooth'})">✅ 部下からの承認待ちタスク：${pend.length}件<span class="x">下へ ›</span></div>`;
+  if(!alerts) alerts='<div class="empty">アラート・承認待ちはありません</div>';
+
+  const me=(state.settings.me||"").trim();
+  const my=myTasks();
+  const myList = my.length? my.map(({p,pr,t,od})=>`
+    <div class="row-item" onclick="go({v:'tasks',pid:'${p.id}',prid:'${pr.id}'})">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="nm">${esc(t.name)}</span>
+        ${t.status==="reported"?'<span class="tag warn">承認待ち</span>':''}
+        <span class="mt-due ${od?'od':''}" style="margin-left:auto">${t.due? (od?'⏰ ':'📅 ')+esc(t.due):'期日未設定'}</span>
+      </div>
+      <div class="sub">${esc(p.name)}／${esc(pr.name)}${t.assignee?'／担当：'+esc(t.assignee):''}</div>
+    </div>`).join(""):'<div class="empty">対象のタスクはありません 🎉</div>';
+
+  const feed=recentLogs();
+  const feedList = feed.length? feed.map(({p,pr,t,l})=>`
+    <div class="fi" onclick="go({v:'tasks',pid:'${p.id}',prid:'${pr.id}'})">
+      <span class="ts">${esc(l.ts.slice(5))}</span>
+      <span><b>${esc(l.who)}</b> が「${esc(t.name)}」を<span class="act ${esc(l.act)}">${ACT_LABEL[l.act]||esc(l.act)}</span>${l.note?'（'+esc(l.note)+'）':''} <span class="muted">${esc(p.name)}</span></span>
+    </div>`).join(""):'<div class="empty">まだ操作履歴がありません</div>';
+
+  const pendList = pend.length? pend.map(({p,pr,t})=>`
+    <div class="row-item" style="cursor:default">
+      <div style="display:flex;align-items:center;gap:8px"><span class="nm">${esc(t.name)}</span><span class="tag warn">承認待ち</span>${isOverdue(t)?'<span class="odchip">⏰ 期日超過</span>':''}</div>
+      <div class="sub">${esc(p.name)}／${esc(pr.name)}　報告者：${esc(t.assignee||'担当者')}${t.due?'／予定日：'+esc(t.due):''}</div>
+      ${state.settings.role==="boss"?`<div style="margin-top:9px;display:flex;gap:8px">
+        <button class="btn primary" style="padding:7px 16px;font-size:12.5px" onclick="approveTask('${p.id}','${pr.id}','${t.id}')">承認する</button>
+        <button class="btn ghost" style="padding:7px 16px;font-size:12.5px" onclick="rejectTask('${p.id}','${pr.id}','${t.id}')">差し戻し</button>
+      </div>`:'<div class="sub" style="margin-top:6px">※承認は上司モードで行えます</div>'}
+    </div>`).join(""):'<div class="empty">承認待ちのタスクはありません</div>';
+
+  return `
+  <div class="seg"><button class="on">トップページ（L1）</button></div>
+  <div class="grid cols-32">
+    <div class="grid" style="align-content:start">
+      <div class="card">
+        <h2><span class="ic" style="background:var(--primary-soft);color:var(--primary)">🏠</span>進行中物件一覧</h2>
+        ${propList}
+      </div>
+      <div class="card mytask">
+        <h2><span class="ic" style="background:var(--primary-soft);color:var(--primary)">🎯</span>${me?esc(me)+'さんの':''}直近タスク（期日順）</h2>
+        ${myList}
+        ${me?'':'<div class="muted" style="font-size:12px;margin-top:8px">⚙️ 設定で名前を登録すると、自分の担当タスクだけに絞り込まれます。</div>'}
+      </div>
+    </div>
+    <div class="grid" style="align-content:start">
+      <div class="card">
+        <h2><span class="ic" style="background:var(--accent-soft);color:#0e8a6c">🔔</span>アラート・承認待ちタスク</h2>
+        ${alerts}
+      </div>
+      <div class="card">
+        <h2><span class="ic" style="background:var(--surface-3)">📊</span>全体統計（躓きの可視化）</h2>
+        ${delayChart()}
+      </div>
+      <div class="card feed">
+        <h2><span class="ic" style="background:var(--surface-3)">📜</span>最近の動き</h2>
+        ${feedList}
+      </div>
+    </div>
+  </div>
+  <div class="card" id="pendBox" style="margin-top:16px">
+    <h2><span class="ic" style="background:var(--warn-soft);color:#a5630f">📥</span>承認待ち詳細</h2>
+    ${pendList}
+  </div>`;
+}
+
+/* =================== L2 Project flow =================== */
+function renderProj(){
+  const p=curProp(); if(!p) return '<div class="empty">物件が見つかりません</div>';
+  const flow = p.processes.map(pr=>{
+    const cls = pr.progress===100?"done":(pr.progress>0?"prog":"");
+    const locked = pr.locked;
+    const od = pr.tasks.filter(t=>isOverdue(t)).length;
+    return `<div class="pf ${locked?'locked':''}">
+      <div class="name" ${locked?'':`onclick="go({v:'tasks',pid:'${p.id}',prid:'${pr.id}'})"`}>
+        ${locked?'🔒':'📂'} ${esc(pr.name)}${od?'<span class="odchip">⏰'+od+'</span>':''}
+      </div>
+      <div class="ptrack"><div class="pfill ${cls}" style="width:${pr.progress}%"></div></div>
+      <span class="pct">${pr.progress}%</span>
+    </div>`;
+  }).join("");
+
+  const andpadRow = p.andpadUrl
+    ? `<a class="linkbtn andpad" href="${esc(p.andpadUrl)}" target="_blank" rel="noopener">ANDPADでこの案件を開く ↗</a>
+       <button class="linkbtn" onclick="setAndpadUrl('${p.id}')">URL変更</button>`
+    : `<button class="linkbtn" onclick="setAndpadUrl('${p.id}')">🔗 ANDPAD URL設定（この物件の案件ページ）</button>`;
+
+  const manualPortal = state.manuals.map(m=>`<button class="portal-btn ${m.cat===nextProcName(p)?'':'alt'}" onclick="go({v:'manual',mid:'${m.id}'})">${esc(m.title)}</button>`).join("");
+
+  return `
+  <div class="grid" style="grid-template-columns:1fr;gap:16px">
+    <div class="card" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px 20px">
+      <span style="font-weight:800">外部連携：</span>${andpadRow}
+    </div>
+    <div class="grid cols-21">
+      <div class="card flow">
+        <h2><span class="ic" style="background:var(--primary-soft);color:var(--primary)">🧭</span>各フロー（工程）一覧</h2>
+        ${flow}
+      </div>
+      <div class="card">
+        <h2><span class="ic" style="background:var(--accent-soft);color:#0e8a6c">📚</span>マニュアルポータル</h2>
+        ${manualPortal}
+      </div>
+    </div>
+  </div>`;
+}
+function setAndpadUrl(pid){
+  const p=state.properties.find(x=>x.id===pid); if(!p)return;
+  const u=prompt("この物件のANDPAD案件ページURLを入力してください（空欄で解除）", p.andpadUrl||"https://work.andpad.jp/");
+  if(u===null)return;
+  p.andpadUrl=u.trim(); save(); render(); toast(p.andpadUrl?"ANDPAD URLを設定しました":"ANDPAD URLを解除しました");
+}
+function nextProcName(p){const pr=p.processes.find(x=>x.progress>0&&x.progress<100)||p.processes.find(x=>!x.locked&&x.progress===0);return pr?pr.name:"";}
+
+/* =================== L3 Task list =================== */
+const CHECK_COLS=["施工M","検査M","行動M","担当チェック","品質チェック"];
+function renderTasks(){
+  const p=curProp(),pr=curProc(); if(!pr) return '<div class="empty">工程が見つかりません</div>';
+  const boss=state.settings.role==="boss";
+  const rows=pr.tasks.map(t=>{
+    const manual = t.manualId? state.manuals.find(m=>m.id===t.manualId):null;
+    const od=isOverdue(t);
+    const checks = t.checks.map((c,i)=>`<td class="cell-check"><span class="chk ${c?'on':''}" onclick="toggleCheck('${p.id}','${pr.id}','${t.id}',${i})">✓</span></td>`).join("");
+    const stBtn = t.status==="approved"
+      ? '<span class="statusbtn approved">✓ 承認済み</span>'
+      : t.status==="reported"
+      ? (boss
+          ? `<span style="display:inline-flex;gap:5px;align-items:center"><button class="statusbtn approved" onclick="approveTask('${p.id}','${pr.id}','${t.id}')">承認</button><button class="statusbtn todo" onclick="rejectTask('${p.id}','${pr.id}','${t.id}')">差戻</button></span>`
+          : `<span class="statusbtn reported">承認待ち</span>`)
+      : `<button class="statusbtn todo" onclick="reportTask('${p.id}','${pr.id}','${t.id}')">完了報告</button>`;
+    return `<tr>
+      <td class="tname">${esc(t.name)}${od?'<span class="odchip">⏰ 期日超過</span>':''}
+        <div class="sub" style="cursor:pointer" onclick="setAssignee('${p.id}','${pr.id}','${t.id}')" title="クリックで担当者を変更">担当：${esc(t.assignee||'未設定')} ✎</div></td>
+      <td>${manual?`<button class="mbtn" onclick="go({v:'manual',mid:'${manual.id}'})">${esc(manual.title)}（PPT）開く</button>`:'<span class="muted" style="font-size:12px">—</span>'}</td>
+      <td class="duecell" style="text-align:center"><input type="date" class="${od?'od':''}" value="${esc(t.due)}" onchange="setDate('${p.id}','${pr.id}','${t.id}','due',this.value)" title="予定日"></td>
+      <td class="duecell" style="text-align:center"><input type="date" value="${esc(t.actual)}" onchange="setDate('${p.id}','${pr.id}','${t.id}','actual',this.value)" title="実施日"></td>
+      ${checks}
+      <td style="text-align:center">${stBtn}</td>
+      <td style="text-align:center"><button class="logbtn" title="操作履歴" onclick="openLog('${p.id}','${pr.id}','${t.id}')">📜</button></td>
+    </tr>`;
+  }).join("");
+
+  // approval mechanism visual based on this process state
+  const anyReported=pr.tasks.some(t=>t.status==="reported");
+  const allApproved=pr.tasks.length>0 && pr.tasks.every(t=>t.status==="approved");
+  const stages=[
+    {t:"担当者完了報告",on:pr.tasks.some(t=>t.status!=="todo")},
+    {t:"自動通知アラーム",on:anyReported||allApproved},
+    {t:"上司の承認",on:allApproved},
+    {t:"次工程のロック解除",fin:allApproved}
+  ];
+  const flow=stages.map((s,i)=>`
+    ${i>0?'<svg class="af-arrow" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>':''}
+    <div class="afn ${s.fin?'fin':(s.on?'active':'')}">
+      <div class="circle">${['✅','🔔','👤','🔓'][i]}</div><div class="t">${s.t}</div>
+    </div>`).join("");
+
+  return `
+  <div class="card">
+    <h2><span class="ic" style="background:var(--primary-soft);color:var(--primary)">📋</span>タスク一覧（${esc(pr.name)}）
+      ${p.andpadUrl?`<a class="linkbtn andpad" style="margin-left:auto" href="${esc(p.andpadUrl)}" target="_blank" rel="noopener">ANDPAD ↗</a>`:''}
+    </h2>
+    <div style="overflow-x:auto">
+    <table class="ttable">
+      <thead><tr><th style="text-align:left">タスク</th><th style="text-align:left">マニュアル</th><th>予定日</th><th>実施日</th>${CHECK_COLS.map(c=>'<th style="min-width:40px">'+esc(c)+'</th>').join("")}<th>状態</th><th>履歴</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <h2 style="font-size:15px">The Approval Mechanism ProcessFlow</h2>
+    <div class="muted" style="font-size:12.5px;margin-top:-6px;margin-bottom:6px">通知タイミングは事前・完了で柔軟に設定可能。全タスク承認で次工程が自動アンロックされます。</div>
+    <div class="approvalflow">${flow}</div>
+  </div>
+  <div style="margin-top:16px"><button class="backbtn" onclick="go({v:'proj',pid:'${p.id}'})">‹ 邸別タスク一覧へ戻る</button></div>`;
+}
+
+/* =================== L4 Manual detail =================== */
+function renderManual(){
+  const m=curManual(); if(!m) return '<div class="empty">マニュアルが見つかりません</div>';
+  const terms=m.terms.map(t=>`<div class="term"><b>${esc(t.t)}</b>：${esc(t.d)}</div>`).join("");
+  const items=m.items.map(it=>`
+    <details class="acc" open>
+      <summary>${esc(it.t)}</summary>
+      <div class="body">
+        <div class="talk">🗣 トーク例：${esc(it.talk)}</div>
+        ${it.note?`<div class="muted" style="font-size:12.5px">※ ${esc(it.note)}</div>`:''}
+      </div>
+    </details>`).join("");
+  const checklist=m.checklist.map((c,i)=>`<label><input type="checkbox" onchange="this.parentNode.style.opacity=this.checked?.55:1"><span>${esc(c)}</span></label>`).join("");
+  const related=state.manuals.filter(x=>x.id!==m.id).map(x=>`
+    <div class="ri" onclick="go({v:'manual',mid:'${x.id}'})">
+      <div class="sr-thumb">${esc(x.code)}<br>P.${x.page}</div>
+      <div><div style="font-weight:800">${esc(x.title)}</div><div class="muted" style="font-size:12px">${esc(x.keywords.slice(0,3).join('・'))}</div></div>
+    </div>`).join("");
+
+  const photoBox=(kind,label)=>{
+    const src=m.photos&&m.photos[kind];
+    return src
+      ? `<div class="photo-box"><img src="${src}" alt="${label}"><button class="rmv" title="写真を削除" onclick="event.stopPropagation();removePhoto('${m.id}','${kind}')">✕</button></div>`
+      : `<div class="photo-box" onclick="pickPhoto('${m.id}','${kind}')">📷 ${label}<br>（クリックで写真を登録）</div>`;
+  };
+  return `
+  <div class="manualgrid">
+    <div class="card">
+      <h2><span class="ic" style="background:var(--primary-soft);color:var(--primary)">${esc(m.code)}</span>${esc(m.title)}　<span class="muted" style="font-size:12px;font-weight:600">P.${m.page}</span>
+        <span style="margin-left:auto;display:inline-flex;gap:6px">
+          ${m.srcUrl?`<a class="linkbtn" href="${esc(m.srcUrl)}" target="_blank" rel="noopener">📎 原本PPTを開く ↗</a>`:''}
+          <button class="linkbtn" onclick="setManualSrc('${m.id}')" title="原本PPT・資料のURL（ANDPAD資料/共有ドライブ等）">${m.srcUrl?'✎':'🔗 原本リンク設定'}</button>
+        </span></h2>
+      <div class="muted" style="font-size:13px;margin-top:-6px;margin-bottom:12px">${esc(m.intro)}</div>
+
+      <div style="font-weight:800;margin:4px 0 6px">OK / NG の写真例</div>
+      <div class="okng">
+        <div class="b ok"><div class="h">⭕ OK例</div>${esc(m.okng.ok)}</div>
+        <div class="b ng"><div class="h">❌ NG例</div>${esc(m.okng.ng)}</div>
+      </div>
+      <div class="okng">
+        ${photoBox('ok','OK写真')}
+        ${photoBox('ng','NG写真')}
+      </div>
+
+      <div style="font-weight:800;margin:16px 0 6px">用語集</div>
+      ${terms}
+
+      <div style="font-weight:800;margin:16px 0 6px">検査項目・トーク例</div>
+      ${items}
+
+      <div style="font-weight:800;margin:16px 0 6px">チェックリスト</div>
+      <div class="checklist">${checklist}</div>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <h2 style="font-size:15px"><span class="ic" style="background:var(--accent-soft);color:#0e8a6c">🔎</span>関連資料を検索</h2>
+        <div class="mini-search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+          <input id="relSearch" placeholder="例：スリーブ勾配" oninput="relSearchRun(this.value)">
+        </div>
+        <div class="related" id="relResults">${related}</div>
+        <div class="muted" style="font-size:12px;margin-top:6px">マニュアル閲覧中も、関連する別資料をサムネイル付きで検索できます。</div>
+      </div>
+    </div>
+  </div>`;
+}
+function relSearchRun(q){
+  q=(q||"").trim();
+  const list = q? searchManuals(q):state.manuals;
+  document.getElementById("relResults").innerHTML = list.length? list.map(x=>`
+    <div class="ri" onclick="go({v:'manual',mid:'${x.id}'})">
+      <div class="sr-thumb">${esc(x.code)}<br>P.${x.page}</div>
+      <div><div style="font-weight:800">${esc(x.title)}</div><div class="muted" style="font-size:12px">${esc(x.keywords.slice(0,3).join('・'))}</div></div>
+    </div>`).join(""):'<div class="empty">該当なし</div>';
+}
+
+/* =================== Manual photos / source link =================== */
+function setManualSrc(mid){
+  const m=state.manuals.find(x=>x.id===mid); if(!m)return;
+  const u=prompt("マニュアル原本（PPT等）のURLを入力してください。\nANDPADの資料URL・共有ドライブのリンク等（空欄で解除）", m.srcUrl||"");
+  if(u===null)return;
+  m.srcUrl=u.trim(); save(); render(); toast(m.srcUrl?"原本リンクを設定しました":"原本リンクを解除しました");
+}
+function pickPhoto(mid,kind){
+  const inp=document.createElement("input");
+  inp.type="file"; inp.accept="image/*";
+  inp.onchange=()=>{ const f=inp.files[0]; if(!f)return; compressImage(f,900,.8).then(url=>{
+    const m=state.manuals.find(x=>x.id===mid); if(!m)return;
+    m.photos=m.photos||{}; m.photos[kind]=url; save(); render(); toast("写真を登録しました");
+  }).catch(()=>toast("画像の読み込みに失敗しました")); };
+  inp.click();
+}
+function removePhoto(mid,kind){
+  const m=state.manuals.find(x=>x.id===mid); if(!m||!m.photos)return;
+  if(!confirm("この写真を削除しますか？"))return;
+  m.photos[kind]=""; save(); render(); toast("写真を削除しました");
+}
+function compressImage(file,maxPx,quality){
+  return new Promise((res,rej)=>{
+    const img=new Image();
+    img.onload=()=>{ let w=img.width,h=img.height;
+      const sc=Math.min(1,maxPx/Math.max(w,h)); w=Math.round(w*sc); h=Math.round(h*sc);
+      const cv=document.createElement("canvas"); cv.width=w; cv.height=h;
+      cv.getContext("2d").drawImage(img,0,0,w,h);
+      res(cv.toDataURL("image/jpeg",quality)); URL.revokeObjectURL(img.src); };
+    img.onerror=rej;
+    img.src=URL.createObjectURL(file);
+  });
+}
+
+/* =================== Settings / role / ANDPAD =================== */
+function refreshRolePill(){
+  const boss=state.settings.role==="boss";
+  document.getElementById("roleLabel").textContent = boss?"上司":"担当者"+(state.settings.me?"・"+state.settings.me:"");
+  document.getElementById("rolePill").classList.toggle("staff",!boss);
+}
+function toggleRole(){
+  state.settings.role = state.settings.role==="boss"?"staff":"boss";
+  save(); refreshRolePill(); render();
+  toast(state.settings.role==="boss"?"上司モード：承認・差し戻しができます":"担当者モード：完了報告のみ");
+}
+function openSettings(){
+  closeMenu();
+  document.getElementById("setMe").value=state.settings.me||"";
+  document.getElementById("setRole").value=state.settings.role||"boss";
+  document.getElementById("setAndpad").value=state.settings.andpadHome||"https://work.andpad.jp/";
+  document.getElementById("settingsModal").classList.add("open");
+}
+function closeSettings(){document.getElementById("settingsModal").classList.remove("open");}
+function saveSettings(){
+  state.settings.me=document.getElementById("setMe").value.trim();
+  state.settings.role=document.getElementById("setRole").value;
+  state.settings.andpadHome=document.getElementById("setAndpad").value.trim()||"https://work.andpad.jp/";
+  save(); closeSettings(); refreshRolePill(); render(); toast("設定を保存しました");
+}
+function openAndpadHome(){
+  const p = state.view.pid? state.properties.find(x=>x.id===state.view.pid):null;
+  const url = (p&&p.andpadUrl)||state.settings.andpadHome||"https://work.andpad.jp/";
+  window.open(url,"_blank","noopener");
+}
+
+/* =================== Workflow actions =================== */
+function findT(pid,prid,tid){const p=state.properties.find(x=>x.id===pid);const pr=p.processes.find(x=>x.id===prid);const t=pr.tasks.find(x=>x.id===tid);return{p,pr,t};}
+function recalcProgress(pr){
+  if(!pr.tasks.length){return;}
+  const approved=pr.tasks.filter(t=>t.status==="approved").length;
+  pr.progress=Math.round(approved/pr.tasks.length*100);
+}
+function unlockNext(p,pr){
+  const idx=p.processes.indexOf(pr);
+  if(pr.progress===100 && p.processes[idx+1]){p.processes[idx+1].locked=false;}
+}
+function reportTask(pid,prid,tid){
+  const{p,pr,t}=findT(pid,prid,tid);
+  t.status="reported";
+  if(!t.assignee)t.assignee=actor();
+  if(!t.actual)t.actual=today();
+  addLog(t,"report");
+  save();render();toast("完了報告しました。上司に通知 → 承認待ちへ");
+}
+function approveTask(pid,prid,tid){
+  const{p,pr,t}=findT(pid,prid,tid);
+  if(state.settings.role!=="boss"){toast("承認は上司モードで行えます（右上の役割ボタンで切替）");return;}
+  t.status="approved";
+  addLog(t,"approve");
+  recalcProgress(pr);unlockNext(p,pr);
+  if(p.alert==="schedule" && propOverdue(p)===0 && !p.processes.some(x=>x.tasks.some(tt=>isOverdue(tt)))) p.alert="";
+  save();render();toast("承認しました"+(pr.progress===100?"。工程完了 → 次工程をアンロック":""));
+}
+function rejectTask(pid,prid,tid){
+  const{p,pr,t}=findT(pid,prid,tid);
+  if(state.settings.role!=="boss"){toast("差し戻しは上司モードで行えます");return;}
+  const reason=prompt("差し戻し理由を入力してください（担当者に伝わります）","");
+  if(reason===null)return;
+  t.status="todo";pr.rework=(pr.rework||0)+1;
+  addLog(t,"reject",reason.trim());
+  save();render();toast("差し戻しました（差し戻し回数+1）");
+}
+function toggleCheck(pid,prid,tid,i){const{t}=findT(pid,prid,tid);t.checks[i]=!t.checks[i];save();render();}
+function setDate(pid,prid,tid,field,val){const{p,pr,t}=findT(pid,prid,tid);t[field]=val;save();render();}
+function setAssignee(pid,prid,tid){
+  const{t}=findT(pid,prid,tid);
+  const v=prompt("このタスクの担当者名",t.assignee||state.settings.me||"");
+  if(v===null)return; t.assignee=v.trim(); save(); render();
+}
+function openLog(pid,prid,tid){
+  const{p,pr,t}=findT(pid,prid,tid);
+  const body=document.getElementById("logBody");
+  body.innerHTML = `<div style="font-weight:800;margin-bottom:8px">${esc(t.name)} <span class="muted" style="font-weight:600;font-size:12px">${esc(p.name)}／${esc(pr.name)}</span></div>`+
+    (t.log.length? '<ul class="loglist">'+t.log.slice().reverse().map(l=>`
+      <li><span class="ts">${esc(l.ts)}</span><span class="who">${esc(l.who)}</span>
+      <span class="act ${esc(l.act)}">${ACT_LABEL[l.act]||esc(l.act)}</span>
+      ${l.note?'<span class="note">'+esc(l.note)+'</span>':''}</li>`).join("")+'</ul>'
+    : '<div class="empty">まだ履歴がありません</div>');
+  document.getElementById("logModal").classList.add("open");
+}
+function closeLog(){document.getElementById("logModal").classList.remove("open");}
+
+/* =================== Global manual search =================== */
+function searchManuals(q){
+  q=q.toLowerCase();
+  return state.manuals.map(m=>{
+    let score=0; const hay=(m.title+" "+m.keywords.join(" ")+" "+m.intro+" "+m.items.map(i=>i.t+i.talk+i.note).join(" ")+" "+m.terms.map(t=>t.t+t.d).join(" ")).toLowerCase();
+    q.split(/\s+/).filter(Boolean).forEach(w=>{ if(m.keywords.some(k=>k.toLowerCase().includes(w)))score+=5; if(m.title.toLowerCase().includes(w))score+=4; if(hay.includes(w))score+=2; });
+    return {m,score};
+  }).filter(r=>r.score>0).sort((a,b)=>b.score-a.score).map(r=>r.m);
+}
+const gs=document.getElementById("globalSearch"), srBox=document.getElementById("searchResults");
+gs.addEventListener("input",()=>{
+  const q=gs.value.trim();
+  if(!q){srBox.classList.remove("open");return;}
+  const res=searchManuals(q);
+  srBox.classList.add("open");
+  srBox.innerHTML = `<div class="sr-head">マニュアル検索結果（${res.length}件）</div>` + (res.length? res.map(m=>{
+    // find matching section for snippet
+    let snip=m.intro;
+    const item=m.items.find(it=>(it.t+it.talk+it.note).toLowerCase().includes(q.toLowerCase()));
+    const term=m.terms.find(t=>(t.t+t.d).toLowerCase().includes(q.toLowerCase()));
+    if(item)snip=item.t; else if(term)snip=term.t+"："+term.d;
+    return `<div class="sr-item" onclick="pickSearch('${m.id}')">
+      <div class="sr-thumb">${esc(m.code)}<br>P.${m.page}</div>
+      <div style="min-width:0"><div class="t">${esc(m.title)}</div><div class="s">${esc(snip).slice(0,46)}</div></div>
+      <div class="pg">P.${m.page} ›</div>
+    </div>`;}).join(""):'<div class="sr-empty">該当するマニュアルがありません</div>');
+});
+gs.addEventListener("blur",()=>setTimeout(()=>srBox.classList.remove("open"),180));
+gs.addEventListener("focus",()=>{if(gs.value.trim())srBox.classList.add("open");});
+function pickSearch(mid){srBox.classList.remove("open");gs.value="";go({v:"manual",mid});}
+
+/* =================== AI chat (Ollama + fallback) =================== */
+let aiOnline=false;
+const OLLAMA_CFG_KEY="kantoku_ollama_cfg";
+function saveOllamaCfg(){try{localStorage.setItem(OLLAMA_CFG_KEY,JSON.stringify(ollamaCfg()));}catch(e){}}
+function loadOllamaCfg(){try{const j=JSON.parse(localStorage.getItem(OLLAMA_CFG_KEY));if(j){if(j.url)document.getElementById("ollamaUrl").value=j.url;if(j.model)document.getElementById("ollamaModel").value=j.model;}}catch(e){}updateModelActive();}
+function updateModelActive(){const m=document.getElementById("ollamaModel").value.trim();document.querySelectorAll(".model-toggle .mt-btn").forEach(b=>b.classList.toggle("on",b.dataset.model===m));}
+function setModel(name){document.getElementById("ollamaModel").value=name;saveOllamaCfg();updateModelActive();checkOllama();toast("モデルを "+name+" に切替");}
+function onModelInput(){saveOllamaCfg();updateModelActive();checkOllama();}
+function openChat(){document.getElementById("drawer").classList.add("open");document.getElementById("scrim").classList.add("open");checkOllama();setTimeout(()=>document.getElementById("chatInput").focus(),250);}
+function closeChat(){document.getElementById("drawer").classList.remove("open");document.getElementById("scrim").classList.remove("open");}
+function clearChat(){const log=document.getElementById("chatLog");if(!log||!log.children.length){toast("チャットは空です");return;}if(confirm("AIチャットの履歴を消去します。よろしいですか？")){log.innerHTML="";toast("チャットをクリアしました");}}
+function autoGrow(el){el.style.height="auto";el.style.height=Math.min(el.scrollHeight,120)+"px";}
+function chatKey(e){if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendChat();}}
+function ollamaCfg(){return{url:document.getElementById("ollamaUrl").value.trim(),model:document.getElementById("ollamaModel").value.trim()};}
+async function checkOllama(){
+  const {url,model}=ollamaCfg(); const st=document.getElementById("aiStatus"); const setup=document.getElementById("aiSetup");
+  st.textContent="接続確認中…"; st.className="st off";
+  try{
+    const r=await fetch(url+"/api/tags",{method:"GET"});
+    if(r.ok){const d=await r.json();aiOnline=true;st.textContent="● オンライン（"+model+"）";st.className="st on";setup.style.display="none";}
+    else throw 0;
+  }catch(e){aiOnline=false;st.textContent="● オフライン（検索のみ）";st.className="st off";setup.style.display="block";}
+}
+function buildContext(){
+  let s="【物件と工程の状況】\n";
+  state.properties.forEach(p=>{
+    s+=`■${p.name}（顧客:${p.customer} / 担当:${p.manager} / 着工:${p.start}${isDelayed(p)?" / ※スケジュール遅延":""}）\n`;
+    p.processes.forEach(pr=>{ s+=`  - ${pr.name}: ${pr.progress}%${pr.locked?"(ロック中)":""}${pr.delay?` 遅延${pr.delay}日`:""}${pr.rework?` 差戻${pr.rework}回`:""}\n`;
+      pr.tasks.forEach(t=>{ if(t.status!=="approved") s+=`      ・${t.name}[${t.status==="reported"?"承認待ち":"未完了"}${t.assignee?" 担当:"+t.assignee:""}${t.due?" 予定:"+t.due:""}${isOverdue(t)?" ※期日超過":""}]\n`; });
+    });
+  });
+  s+=`\n本日:${today()}\n`;
+  s+="\n【マニュアル】\n";
+  state.manuals.forEach(m=>{ s+=`■${m.title}(P.${m.page}) キーワード:${m.keywords.join("・")}\n  ${m.intro}\n  検査:${m.items.map(i=>i.t+"→"+i.talk).join(" / ")}\n  OK:${m.okng.ok} / NG:${m.okng.ng}\n`; });
+  return s;
+}
+function dataHits(q){
+  const lc=q.toLowerCase(); let hits=[];
+  state.properties.forEach(p=>{ if((p.name+p.customer+p.manager).toLowerCase().includes(lc)||(/(遅延|遅れ|アラート|超過)/.test(q)&&isDelayed(p))) hits.push({label:"物件 "+p.name+"（"+p.customer+"）"+(isDelayed(p)?"※遅延":""),v:{v:"proj",pid:p.id}});});
+  searchManuals(q).forEach(m=>hits.push({label:"マニュアル "+m.title+" P."+m.page,v:{v:"manual",mid:m.id}}));
+  return hits.slice(0,6);
+}
+function addMsg(role,text,hits){
+  const log=document.getElementById("chatLog");
+  const d=document.createElement("div");d.className="msg "+(role==="user"?"u":"a");d.textContent=text;
+  if(hits&&hits.length){const h=document.createElement("div");h.className="hits";
+    hits.forEach(x=>{const b=document.createElement("div");b.className="hit";b.textContent="› "+x.label;b.onclick=()=>{go(x.v);closeChat();};h.appendChild(b);});d.appendChild(h);}
+  log.appendChild(d);log.scrollTop=log.scrollHeight;return d;
+}
+async function sendChat(){
+  const inp=document.getElementById("chatInput");const q=inp.value.trim();if(!q)return;
+  inp.value="";autoGrow(inp);addMsg("user",q);
+  const hits=dataHits(q);
+  if(!aiOnline){
+    let ans = hits.length? "ローカルAIがオフラインのため、データ検索の結果を表示します。下の項目から開けます。" : "ローカルAIがオフラインで、該当データも見つかりませんでした。Ollamaを起動すると自然文で回答できます。";
+    addMsg("ai",ans,hits);return;
+  }
+  const {url,model}=ollamaCfg();
+  const bubble=addMsg("ai","…");
+  try{
+    const res=await fetch(url+"/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model,stream:true,options:{num_ctx:8192,temperature:0.3},
+        messages:[
+          {role:"system",content:"あなたは住宅建築現場の監督アシスタントです。以下のデータだけに基づき、日本語で簡潔に答えてください。該当する物件名・工程・マニュアル名は具体的に示してください。データにない事は推測せず『データにありません』と答えてください。\n\n"+buildContext()},
+          {role:"user",content:q}
+        ]})});
+    if(!res.ok||!res.body)throw new Error("bad");
+    const reader=res.body.getReader();const dec=new TextDecoder();let acc="",buf="";
+    bubble.textContent="";
+    while(true){const{done,value}=await reader.read();if(done)break;
+      buf+=dec.decode(value,{stream:true});const lines=buf.split("\n");buf=lines.pop();
+      for(const ln of lines){if(!ln.trim())continue;try{const j=JSON.parse(ln);if(j.message&&j.message.content){acc+=j.message.content;bubble.textContent=acc;document.getElementById("chatLog").scrollTop=1e9;}}catch(e){}}
+    }
+    if(hits.length){const h=document.createElement("div");h.className="hits";hits.forEach(x=>{const b=document.createElement("div");b.className="hit";b.textContent="› "+x.label;b.onclick=()=>{go(x.v);closeChat();};h.appendChild(b);});bubble.appendChild(h);}
+  }catch(e){bubble.textContent="AI接続に失敗しました。データ検索の結果を表示します。";aiOnline=false;checkOllama();
+    if(hits.length){const h=document.createElement("div");h.className="hits";hits.forEach(x=>{const b=document.createElement("div");b.className="hit";b.textContent="› "+x.label;b.onclick=()=>{go(x.v);closeChat();};h.appendChild(b);});bubble.appendChild(h);}}
+}
+
+/* =================== Import (CSV/TSV/JSON + column mapping) =================== */
+let importParsed=null; // {headers:[], rows:[[]]}
+const FIELD_OPTS=[["","（取り込まない）"],["name","物件名"],["customer","顧客名"],["manager","担当者"],["start","着工日"],["process","工程名"],["progress","進捗%"],["task","タスク名"],["assignee","タスク担当"],["due","予定日"],["status","状態(todo/reported/approved)"],["andpad","ANDPAD案件URL"]];
+function openImport(){closeMenu();document.getElementById("importModal").classList.add("open");importParsed=null;importStep1();}
+function closeImport(){document.getElementById("importModal").classList.remove("open");}
+function importStep1(){
+  document.getElementById("importBody").innerHTML=`
+   <div class="muted" style="margin-bottom:10px;font-size:13px">CSV / TSV / JSON に対応。1行＝物件、または「物件×工程×タスク」の明細行でもOK（次の画面で列を対応づけます）。</div>
+   <div class="drop" id="drop">📁 ファイルをドロップ、またはクリックして選択<br><span class="muted" style="font-size:12px">.csv / .tsv / .json</span></div>
+   <input type="file" id="fileIn" accept=".csv,.tsv,.txt,.json" style="display:none">
+   <div style="margin-top:14px" class="muted" style="font-size:12px">列の例：物件名, 顧客名, 担当者, 着工日, 工程名, 進捗%, タスク名, 状態</div>`;
+  const drop=document.getElementById("drop"),fileIn=document.getElementById("fileIn");
+  drop.onclick=()=>fileIn.click();
+  drop.ondragover=e=>{e.preventDefault();drop.classList.add("drag");};
+  drop.ondragleave=()=>drop.classList.remove("drag");
+  drop.ondrop=e=>{e.preventDefault();drop.classList.remove("drag");if(e.dataTransfer.files[0])readFile(e.dataTransfer.files[0]);};
+  fileIn.onchange=e=>{if(e.target.files[0])readFile(e.target.files[0]);};
+}
+function readFile(file){
+  const rd=new FileReader();
+  rd.onload=()=>{
+    const txt=rd.result;const nm=file.name.toLowerCase();
+    try{
+      if(nm.endsWith(".json")){parseJSON(txt);}
+      else{const delim=nm.endsWith(".tsv")||txt.indexOf("\t")>-1&&txt.indexOf(",")===-1?"\t":",";parseDelimited(txt,delim);}
+      importStep2();
+    }catch(e){toast("読み込みに失敗：形式を確認してください");}
+  };
+  rd.readAsText(file,"UTF-8");
+}
+function parseDelimited(txt,delim){
+  const rows=csvParse(txt,delim).filter(r=>r.length&&r.some(c=>String(c).trim()!==""));
+  if(!rows.length)throw 0;
+  importParsed={headers:rows[0].map(h=>String(h).trim()),rows:rows.slice(1)};
+}
+function csvParse(txt,delim){
+  const out=[];let row=[],cur="",q=false;
+  txt=txt.replace(/\r\n/g,"\n").replace(/\r/g,"\n");
+  for(let i=0;i<txt.length;i++){const c=txt[i];
+    if(q){if(c==='"'){if(txt[i+1]==='"'){cur+='"';i++;}else q=false;}else cur+=c;}
+    else{if(c==='"')q=true;else if(c===delim){row.push(cur);cur="";}else if(c==="\n"){row.push(cur);out.push(row);row=[];cur="";}else cur+=c;}
+  }
+  if(cur!==""||row.length){row.push(cur);out.push(row);}
+  return out;
+}
+function parseJSON(txt){
+  const j=JSON.parse(txt);
+  if(Array.isArray(j)&&j.length&&typeof j[0]==="object"){
+    const headers=[...new Set(j.flatMap(o=>Object.keys(o)))];
+    importParsed={headers,rows:j.map(o=>headers.map(h=>o[h]==null?"":o[h]))};
+  } else if(j&&Array.isArray(j.properties)){ // native export
+    state=Object.assign({view:{v:"dash"}},j); save(); closeImport(); render(); toast("JSONを読み込みました（ネイティブ形式）"); throw "handled";
+  } else throw 0;
+}
+function guessField(h){
+  const s=h.toLowerCase();
+  if(/andpad|アンドパッド|url|リンク/.test(s))return"andpad";
+  if(/物件|邸|案件|現場|name|property/.test(s))return"name";
+  if(/顧客|施主|customer|client/.test(s))return"customer";
+  if(/担当|監督|manager|staff/.test(s))return"manager";
+  if(/着工|開始|start/.test(s))return"start";
+  if(/工程|フロー|phase|process/.test(s))return"process";
+  if(/進捗|progress|%/.test(s))return"progress";
+  if(/タスク|task|作業/.test(s))return"task";
+  if(/状態|status/.test(s))return"status";
+  if(/予定|due|期限/.test(s))return"due";
+  return"";
+}
+function importStep2(){
+  if(!importParsed)return;
+  const {headers,rows}=importParsed;
+  const sel=headers.map((h,i)=>`<label>${esc(h)||'(列'+(i+1)+')'}<select data-col="${i}">${FIELD_OPTS.map(o=>`<option value="${o[0]}" ${o[0]===guessField(h)?'selected':''}>${o[1]}</option>`).join("")}</select></label>`).join("");
+  const prev=rows.slice(0,4);
+  const tbl=`<table class="preview-tbl"><thead><tr>${headers.map(h=>'<th>'+esc(h)+'</th>').join("")}</tr></thead><tbody>${prev.map(r=>'<tr>'+headers.map((_,i)=>'<td>'+esc(String(r[i]??"")).slice(0,24)+'</td>').join("")+'</tr>').join("")}</tbody></table>`;
+  document.getElementById("importBody").innerHTML=`
+    <div style="font-weight:800;margin-bottom:4px">列の対応づけ（${rows.length}行）</div>
+    <div class="muted" style="font-size:12.5px;margin-bottom:8px">検出した列を、システムの項目に割り当ててください。最低でも「物件名」を1つ指定すれば取り込めます。</div>
+    <div class="map-grid">${sel}</div>
+    <div style="font-weight:800;margin:14px 0 4px">プレビュー</div>
+    ${tbl}
+    <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end">
+      <button class="btn ghost" onclick="importStep1()">‹ 戻る</button>
+      <button class="btn primary" onclick="runImport()">取り込む</button>
+    </div>`;
+}
+function runImport(){
+  const sels=[...document.querySelectorAll('#importBody select')];
+  const map={};sels.forEach(s=>{const f=s.value;if(f)map[f]=parseInt(s.dataset.col);});
+  if(map.name==null){toast("「物件名」を1つ指定してください");return;}
+  const {rows}=importParsed; const byName={};
+  rows.forEach(r=>{
+    const name=String(r[map.name]??"").trim();if(!name)return;
+    if(!byName[name]){byName[name]={id:name+"-"+Math.random().toString(36).slice(2,5),name,
+      customer:map.customer!=null?String(r[map.customer]??"").trim():"",
+      manager:map.manager!=null?String(r[map.manager]??"").trim():"",
+      start:map.start!=null?String(r[map.start]??"").trim():"",
+      andpadUrl:map.andpad!=null?String(r[map.andpad]??"").trim():"",
+      processes:[]};}
+    const prop=byName[name];
+    const procName=map.process!=null?String(r[map.process]??"").trim():"";
+    if(procName){
+      let pr=prop.processes.find(x=>x.name===procName);
+      if(!pr){pr={id:name+"-"+procName+"-"+prop.processes.length,name:procName,
+        progress:map.progress!=null?clampPct(r[map.progress]):0,locked:false,delay:0,rework:0,tasks:[]};prop.processes.push(pr);}
+      else if(map.progress!=null)pr.progress=clampPct(r[map.progress]);
+      const taskName=map.task!=null?String(r[map.task]??"").trim():"";
+      if(taskName){pr.tasks.push({id:pr.id+"-t"+pr.tasks.length,name:taskName,manualId:guessManual(procName,taskName),
+        assignee:map.assignee!=null?String(r[map.assignee]??"").trim():"",due:normDate(map.due!=null?r[map.due]:""),actual:"",
+        status:normStatus(map.status!=null?r[map.status]:""),checks:[false,false,false,false,false],log:[]});}
+    }
+  });
+  let props=Object.values(byName);
+  // ensure standard process scaffold if none provided
+  props.forEach(p=>{if(!p.processes.length){p.processes=PROCS.map((pn,i)=>({id:p.id+"-p"+i,name:pn,progress:0,locked:i>0,delay:0,rework:0,tasks:mkTasks(pn,null,"todo")}));}
+    p.processes.forEach(pr=>{if(!pr.tasks.length)pr.tasks=mkTasks(pr.name,null,pr.progress===100?"approved":"todo");recalcLock(p);});});
+  state.properties=props; save(); closeImport(); go({v:"dash"}); toast(props.length+"件の物件を取り込みました");
+}
+function recalcLock(p){p.processes.forEach((pr,i)=>{pr.locked = i>0 && p.processes[i-1].progress<100 && pr.progress===0;});}
+function clampPct(v){let n=parseFloat(String(v).replace("%",""));if(isNaN(n))n=0;return Math.max(0,Math.min(100,Math.round(n)));}
+function normStatus(v){v=String(v||"").toLowerCase();if(/appr|承認/.test(v))return"approved";if(/report|報告|待ち/.test(v))return"reported";return"todo";}
+function normDate(v){
+  v=String(v||"").trim(); if(!v)return"";
+  const m=v.match(/(\d{4})[\/\-年\.](\d{1,2})[\/\-月\.](\d{1,2})/);
+  if(m)return `${m[1]}-${String(m[2]).padStart(2,"0")}-${String(m[3]).padStart(2,"0")}`;
+  return "";
+}
+function guessManual(proc,task){const s=(proc+task);if(/基礎/.test(s))return"m04";if(/土台/.test(s))return"m05";if(/貫通|スリーブ/.test(s))return"m09";return null;}
+
+/* =================== export =================== */
+function exportJSON(){closeMenu();dl(JSON.stringify(state,null,2),"kantoku_backup.json","application/json");toast("JSONを書き出しました");}
+function exportCSV(){closeMenu();
+  const st={todo:"未完了",reported:"承認待ち",approved:"承認済み"};
+  let rows=[["物件名","顧客名","担当者","着工日","ANDPAD URL","工程名","進捗%","タスク名","タスク担当","予定日","実施日","状態","期日超過"]];
+  state.properties.forEach(p=>p.processes.forEach(pr=>{
+    if(!pr.tasks.length)rows.push([p.name,p.customer,p.manager,p.start,p.andpadUrl||"",pr.name,pr.progress,"","","","","",""]);
+    pr.tasks.forEach(t=>rows.push([p.name,p.customer,p.manager,p.start,p.andpadUrl||"",pr.name,pr.progress,t.name,t.assignee||"",t.due||"",t.actual||"",st[t.status]||t.status,isOverdue(t)?"超過":""]));
+  }));
+  const csv=rows.map(r=>r.map(c=>{c=String(c??"");return /[",\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c;}).join(",")).join("\n");
+  dl("\ufeff"+csv,"物件一覧.csv","text/csv");toast("CSVを書き出しました");
+}
+function dl(content,name,type){const b=new Blob([content],{type});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);}
+
+/* =================== misc UI =================== */
+function toggleMenu(e){e.stopPropagation();document.getElementById("dataMenu").classList.toggle("open");}
+function closeMenu(){document.getElementById("dataMenu").classList.remove("open");}
+document.addEventListener("click",e=>{if(!e.target.closest("#menuBtn")&&!e.target.closest("#dataMenu"))closeMenu();});
+let toastT;function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),2200);}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+window.addEventListener("resize",()=>{if(state.view.v==="proj")render();});
+
+loadOllamaCfg();
+refreshRolePill();
+render();
+</script>
+</body>
+</html>
