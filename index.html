@@ -348,11 +348,11 @@
     <span class="mt-lab">モデル</span>
     <button class="mt-btn" data-model="gemma3:4b" onclick="setModel('gemma3:4b')">gemma3:4b</button>
     <button class="mt-btn" data-model="gemma4:e4b" onclick="setModel('gemma4:e4b')">gemma4:e4b</button>
-    <input id="ollamaModel" value="gemma3:4b" title="モデル名（直接入力も可）" placeholder="モデル名" onchange="onModelInput()">
+    <input id="ollamaModel" value="gemma4:e4b" title="モデル名（直接入力も可）" placeholder="モデル名" onchange="onModelInput()">
   </div>
   <div class="setup" id="aiSetup">
     ローカルAI（Ollama / Gemma・無料）が未接続です。AIなしでも下の入力でデータ検索は使えます。上のボタンでモデルを切替できます。<br>
-    有効化（Mac・無料）：①<code>ollama pull gemma3:4b</code>（または <code>gemma4:e4b</code>）　②<code>launchctl setenv OLLAMA_ORIGINS "*"</code>　③Ollama（メニューバー）を再起動
+    有効化（Mac・無料）：①<code>ollama pull gemma4:e4b</code>（軽量版は <code>gemma3:4b</code>）　②<code>launchctl setenv OLLAMA_ORIGINS "*"</code>　③Ollama（メニューバー）を再起動
     <details style="margin-top:8px">
       <summary style="cursor:pointer;font-weight:700">詳細設定（接続先アドレス・通常は変更不要）</summary>
       <div class="cfg">
